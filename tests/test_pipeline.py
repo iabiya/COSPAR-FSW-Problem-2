@@ -424,3 +424,40 @@ def test_success_counters():
     assert counters.telecommands_rejected == before_tc_rejected
     assert counters.frames_rejected == before_frame_rejected
     assert counters.packets_rejected == before_packet_rejected
+    
+def test_failure_generates_st_1_8():
+    from main import process_frame
+    from packet_builder import build_space_packet
+    from frame import build_frame
+    from verification import handler_failure
+    from decoder import decode_space_packet, decode_pus_secondary_header
+
+    packet = build_space_packet(
+        apid=17,
+        service=99,
+        subtype=99,
+        user_data=b"FAIL"
+    )
+
+    frame = build_frame(packet)
+
+    result = process_frame(frame)
+
+    assert result["status"] == "FAILURE"
+
+    # Generate the failure verification report
+    failure_report = handler_failure(
+        service=99,
+        subtype=99,
+        failure_code="Unsupported service/subtype"
+    )
+
+    failure_packet = failure_report["packet"]
+
+    # Decode the generated verification packet
+    decoded = decode_space_packet(failure_packet)
+    pus_header = decode_pus_secondary_header(decoded["data"])
+
+    # Verify ST[1,8]
+    assert pus_header["service"] == 1
+    assert pus_header["subtype"] == 8

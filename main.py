@@ -315,7 +315,7 @@ def process_frame(frame):
 
 
 # =========================================
-# DEVELOPMENT TEST
+# STREAM PROCESSING
 # =========================================
 
 # Create a test Space Packet
@@ -379,7 +379,9 @@ def process_multiple_frames(stream: bytes):
             "status": "FAILURE",
             "message": str(error)
         }]
-
+# =========================================
+# DEVELOPMENT TEST
+# =========================================
 if __name__ == "__main__":
     test_packet = build_space_packet(
         apid=17,
